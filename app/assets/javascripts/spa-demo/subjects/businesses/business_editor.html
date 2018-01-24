@@ -1,0 +1,49 @@
+<form class="business-form row" name="businessform">
+  <span class="business_id id">{{$ctrl.item.id}}</span>
+  <span class="invalid">{{$ctrl.item.errors.full_messages}}</span>
+
+  <div class="business-offer row col-lg-12">
+    <label class="col-xs-3">Offer:</label>
+    <input class="col-xs-9"
+           name="business-offer"
+           ng-model="$ctrl.item.offer"
+           ng-readonly="!$ctrl.authz.canUpdate"
+           maxlength="80"
+           pattern=".{3,}" title="3 character minimum for Offer"/>
+    <label class="col-xs-3">Description:</label>
+    <input class="col-xs-9"
+           name="business-description"
+           ng-model="$ctrl.item.description"
+           ng-readonly="!$ctrl.authz.canUpdate"
+           maxlength="80"
+           pattern=".{3,}" title="3 character minimum for Description"/>
+    <span class="invalid">{{$ctrl.item.errors.name}}</span>
+  </div>
+
+  <div class="business-controls">
+    <span ng-show="$ctrl.authz.authenticated">
+      <button name="business-create"
+              ng-show="!$ctrl.item.id && $ctrl.authz.canCreate"
+              type="submit"
+              ng-disabled="businessform.$invalid"
+              ng-click="$ctrl.create()">Create Business</button>
+
+      <span ng-show="$ctrl.item.id">
+        <button name="business-update"
+                type="submit"
+                ng-show="$ctrl.authz.canUpdate"
+                ng-disabled="!businessform.$dirty"
+                ng-click="$ctrl.update()">Update Business</button>
+        <button name="business-delete"
+                type="submit"
+                ng-show="$ctrl.authz.canDelete"
+                ng-click="$ctrl.remove()">Delete Business</button>
+      </span>
+    </span>
+    <button name="business-clear"
+            type="submit"
+            ng-show="$ctrl.item.id || businessform.$dirty"
+            ng-click="$ctrl.clear()">Clear Business</button>
+  </div>
+
+</form>
