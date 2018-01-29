@@ -11,6 +11,7 @@ class ThingsController < ApplicationController
     authorize Thing
     things = policy_scope(Thing.all)
     @things = ThingPolicy.merge(things)
+
   end
 
   def show
@@ -19,7 +20,9 @@ class ThingsController < ApplicationController
                                     Thing.where(:id=>@thing.id))
                                     .user_roles(false)
     @thing = ThingPolicy.merge(things).first
-    # pp @thing
+    # pp @thing.user_roles
+    # byebug
+
   end
 
   def create

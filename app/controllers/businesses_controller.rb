@@ -1,4 +1,6 @@
 class BusinessesController < ApplicationController
+
+
   before_action :set_business, only: [:show, :update, :destroy]
   wrap_parameters :business, include: ["offer", "description"]
   before_action :authenticate_user!, only: [:index, :show, :create, :update, :destroy]
@@ -9,21 +11,17 @@ class BusinessesController < ApplicationController
     authorize Business
     @businesses = policy_scope(Business.all)
     @businesses = BusinessPolicy.merge(@businesses)
-    pp @businesses.map {|r| r.attributes}
-    # byebug
+
   end
 
   def show
     authorize @business
-    businesses = policy_scope(Business.where(:id=>@business.id))
+    businesses = BusinessPolicy::Scope.new(current_user,
+                                    Business.where(:id=>@business.id))
+                                    .user_roles(false)
     @business = BusinessPolicy.merge(businesses).first
-
-    # businesses = BusinessPolicy::Scope.new(current_user,
-    #                                 Business.where(:id=>@business.id))
-    #                                 .user_roles(false)
-    # @business = BusinessPolicy.merge(businesses).first
-
-    pp @business
+    # pp @business.user_roles
+    # byebug
 
   end
 
@@ -34,9 +32,11 @@ class BusinessesController < ApplicationController
 
     User.transaction do
       if @business.save
+        # pp @business
         role=current_user.add_role(Role::ORGANIZER, @business)
         @business.user_roles << role.role_name
         role.save!
+        # pp role
         # byebug
         render :show, status: :created, location: @business
       else

@@ -28,7 +28,7 @@ module SubjectsUiHelper
   end
 
   def visit_image image
-    unless page.has_css?("sd-image-editor .image-form span.image_id", 
+    unless page.has_css?("sd-image-editor .image-form span.image_id",
                           :text=>image.id,:visible=>false)
       visit "#{ui_path}/#/images/#{image.id}"
     end
@@ -39,11 +39,11 @@ module SubjectsUiHelper
   end
 
   def displayed_caption(image)
-    image.caption ? image.caption : "(no caption #{image.id})" 
+    image.caption ? image.caption : "(no caption #{image.id})"
   end
 
   def visit_thing thing
-    unless page.has_css?("sd-thing-editor .thing-form span.thing_id", 
+    unless page.has_css?("sd-thing-editor .thing-form span.thing_id",
                           :text=>thing.id,:visible=>false)
       visit "#{ui_path}/#/things/#{thing.id}"
     end
@@ -67,9 +67,39 @@ module SubjectsUiHelper
   def visit_things things
     visit "#{ui_path}/#/things/"
     within("sd-thing-selector", :wait=>5) do
-      if logged_in? 
+      if logged_in?
         expect(page).to have_css(".thing-list")
         expect(page).to have_css(".thing-list li",:count=>things.count, :wait=>5)
+      end
+    end
+  end
+
+
+
+  def visit_business business
+    unless page.has_css?("sd-business-editor .business-form span.business_id",
+                          :text=>business.id,:visible=>false)
+      visit "#{ui_path}/#/businesses/#{business.id}"
+    end
+    within("sd-business-editor .business-form") do
+      expect(page).to have_css("span.business_id",:text=>business.id,:visible=>false)
+    end
+  end
+
+  def business_editor_loaded! business
+    expect(page).to have_css("sd-business-editor")
+    within("sd-business-editor .business-form") do
+      expect(page).to have_css("span.business_id",:text=>business.id,
+                                               :visible=>false)
+    end
+  end
+
+  def visit_businesses businesses
+    visit "#{ui_path}/#/businesses/"
+    within("sd-business-selector", :wait=>5) do
+      if logged_in?
+        expect(page).to have_css(".business-list")
+        expect(page).to have_css(".business-list li",:count=>businesses.count, :wait=>5)
       end
     end
   end

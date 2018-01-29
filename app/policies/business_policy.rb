@@ -3,6 +3,7 @@ class BusinessPolicy < ApplicationPolicy
     true
   end
   def show?
+    # true
     organizer_or_admin?
   end
   def create?

@@ -11,10 +11,10 @@ RSpec.feature "AuthzBusinesses", type: :feature, js:true do
   let(:member)        { create_user }
   let(:authenticated) { create_user }
   let(:business_props)   { FactoryBot.attributes_for(:business) }
-  let(:businesses)        { FactoryBot.create_list(:business, 3,
-                                                :with_roles,
-                                                :originator_id=>originator[:id],
-                                                :member_id=>member[:id]) }
+  let(:businesses)       { FactoryBot.create_list(:business, 3,
+                                                  :with_roles,
+                                                  :originator_id=>originator[:id],
+                                                  :member_id=>member[:id]) }
   let(:business)         { businesses[0] }
 
   shared_examples "cannot list businesses" do
@@ -28,7 +28,7 @@ RSpec.feature "AuthzBusinesses", type: :feature, js:true do
       visit_businesses businesses
       within("sd-business-selector .business-list") do
         businesses.each do |t|
-          expect(page).to have_css("li a",:text=>t.name)
+          expect(page).to have_css("li a",:text=>t.offer)
           expect(page).to have_css(".business_id",:text=>t.id,:visible=>false)
           expect(page).to have_no_css(".business_id") #should be hidden
         end
@@ -55,7 +55,7 @@ RSpec.feature "AuthzBusinesses", type: :feature, js:true do
     it "cannot edit description for invalid business" do
       within("sd-business-editor .business-form") do
         expect(page).to have_field("business-offer", :visible=>true)
-        expect(page).to have_no_field("business-descriptionription")
+        expect(page).to have_no_field("business-description")
       end
     end
     it "cannot create invalid business" do
@@ -86,7 +86,7 @@ RSpec.feature "AuthzBusinesses", type: :feature, js:true do
       visit_business business
       within("sd-business-editor .business-form") do
         expect(page).to have_css(".business_id", :text=>business.id, :visible=>false)
-        expect(page).to have_field("business-offer", :with=>business.name)
+        expect(page).to have_field("business-offer", :with=>business.offer)
         expect(page).to have_no_css(".business_id") #should be hidden
       end
     end
@@ -96,7 +96,7 @@ RSpec.feature "AuthzBusinesses", type: :feature, js:true do
     it "clears business" do
       within("sd-business-editor .business-form") do
         expect(page).to have_css(".business_id", :text=>business.id, :visible=>false)
-        expect(page).to have_field("business-offer", :with=>business.name)
+        expect(page).to have_field("business-offer", :with=>business.offer)
         click_button("Clear Business")
         expect(page).to have_no_css(".business_id", :text=>business.id, :visible=>false)
         expect(page).to have_field("business-offer", :with=>"")
@@ -108,7 +108,7 @@ RSpec.feature "AuthzBusinesses", type: :feature, js:true do
   shared_examples "cannot see details" do
     it "hides details" do
       within("sd-business-editor .business-form") do
-        expect(page).to have_field("business-offer", :with=>business.name)
+        expect(page).to have_field("business-offer", :with=>business.offer)
         expect(page).to have_field("business-description", :with=>business.description)
       end
     end
@@ -116,7 +116,7 @@ RSpec.feature "AuthzBusinesses", type: :feature, js:true do
   shared_examples "can see details" do |readonly|
     it "shows details" do
       within("sd-business-editor .business-form") do
-        expect(page).to have_field("business-offer", :with=>business.name)
+        expect(page).to have_field("business-offer", :with=>business.offer)
         expect(page).to have_field("business-description", :with=>business.description)
       end
     end
@@ -125,10 +125,8 @@ RSpec.feature "AuthzBusinesses", type: :feature, js:true do
   shared_examples "cannot update business" do
     it "fields read-only" do
       within("sd-business-editor .business-form") do
-        expect(page).to have_field("business-offer", :with=>business.name, :readonly=>true)
+        expect(page).to have_field("business-offer", :with=>business.offer, :readonly=>true)
         expect(page).to have_field("business-description", :with=>business.description, :readonly=>true)
-        if page.has_field?("business-notes")
-        end
       end
     end
   end
@@ -156,7 +154,7 @@ RSpec.feature "AuthzBusinesses", type: :feature, js:true do
       expect(page).to have_no_button("Update Business")
       new_text=Faker::Lorem.characters(5000)
       fill_in(field_name, :with=>new_text)
-      text_field=find("textarea[name='#{field_name}']")
+      text_field=find("textarea[offer='#{field_name}']")
       expect(text_field.value.size).to eq(4000)  #stops as maxlength
       expect(text_field.value).to eq(new_text.slice(0,4000))
     end
@@ -176,9 +174,6 @@ RSpec.feature "AuthzBusinesses", type: :feature, js:true do
     it "cannot update with invalid description" do
       update_text_field "business-description"
     end
-    it "cannot update with invalid notes" do
-      update_text_field "business-notes"
-    end
   end
 
   shared_examples "can delete business" do
@@ -186,7 +181,7 @@ RSpec.feature "AuthzBusinesses", type: :feature, js:true do
       visit_businesses businesses
       within("sd-business-selector .business-list") do
         expect(page).to have_css(".business_id", :text=>business.id, :visible=>false)
-        expect(page).to have_css("li a",:text=>business.name)
+        expect(page).to have_css("li a",:text=>business.offer)
       end
 
       visit_business business
@@ -197,7 +192,7 @@ RSpec.feature "AuthzBusinesses", type: :feature, js:true do
 
       within("sd-business-selector .business-list") do
         expect(page).to have_no_css(".business_id", :text=>business.id, :visible=>false)
-        expect(page).to have_no_css("li a",:text=>business.name)
+        expect(page).to have_no_css("li a",:text=>business.offer)
       end
     end
   end
@@ -316,21 +311,18 @@ RSpec.feature "AuthzBusinesses", type: :feature, js:true do
         login organizer
         select_business
         within("sd-business-editor .business-form") do
-          expect(page).to have_field("business-offer", :with=>business.name)
+          expect(page).to have_field("business-offer", :with=>business.offer)
           expect(page).to have_field("business-description", :visible=>true,
-                                                   :readonly=>false)
-          expect(page).to have_field("business-notes",:visible=>true,
                                                    :readonly=>false)
           expect(page).to have_css("button");
         end
 
         logout
         within("sd-business-editor .business-form") do
-          expect(page).to have_field("business-offer", :with=>business.name,
+          expect(page).to have_field("business-offer", :with=>business.offer,
                                                    :readonly=>true)
           expect(page).to have_field("business-description", :with=>business.description,
                                                    :readonly=>true)
-          expect(page).to have_no_field("business-notes")
           expect(page).to have_no_css("button");
         end
       end

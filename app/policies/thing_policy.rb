@@ -52,7 +52,7 @@ class ThingPolicy < ApplicationPolicy
              if members_only
                s.where("r.role_name"=>[Role::ORGANIZER, Role::MEMBER])
              end}
-             # byebug
+            # binding.pry
     end
     def resolve
       user_roles
